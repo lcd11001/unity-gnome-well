@@ -26,7 +26,7 @@ public class Rope : MonoBehaviour
 
     public void ResetLength()
     {
-        foreach(GameObject segment in ropeSegments)
+        foreach (GameObject segment in ropeSegments)
         {
             Destroy(segment);
         }
@@ -96,6 +96,46 @@ public class Rope : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        GameObject topSegment = ropeSegments[0];
+        SpringJoint2D topSegmentJoint = topSegment.GetComponent<SpringJoint2D>();
 
+        if (isIncreasing)
+        {
+            if (topSegmentJoint.distance >= maxRopeSegmentLength)
+            {
+                CreateRopeSegment();
+            }
+            else
+            {
+                topSegmentJoint.distance += ropeSpeed * Time.deltaTime;
+            }
+        }
+
+        if (isDecreasing)
+        {
+            if (topSegmentJoint.distance <= 0.005f)
+            {
+                RemoveRopeSegment();
+            }
+            else
+            {
+                topSegmentJoint.distance -= ropeSpeed * Time.deltaTime;
+            }
+        }
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.positionCount = ropeSegments.Count + 2;
+            
+            lineRenderer.SetPosition(0, this.transform.position);
+            
+            for (int i = 0; i < ropeSegments.Count; i++)
+            {
+                lineRenderer.SetPosition(i + 1, ropeSegments[i].transform.position);
+            }
+
+            SpringJoint2D connectedObjectJoint = connectedObject.GetComponent<SpringJoint2D>();
+            lineRenderer.SetPosition(ropeSegments.Count + 1, connectedObject.transform.TransformPoint(connectedObjectJoint.anchor));
+        }
     }
 }
